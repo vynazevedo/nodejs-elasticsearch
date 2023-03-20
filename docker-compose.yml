@@ -1,31 +1,99 @@
-version: '3.8'
+version: '3'
 
 services:
-  nodejs:
-    build: .
-    container_name: nodejs
-    ports:
-      - "3000:3000"
-    depends_on:
-      - elasticsearch
-
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - http.host=0.0.0.0
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
-      - "9300:9300"
+    networks:
+      - elastic
 
-volumes:
-  elasticsearch-data:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.15.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+
+  kafka:
+    image: confluentinc/cp-kafka:6.2.0
+    container_name: kafka
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_NUM_PARTITIONS: 1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - elastic
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:6.2.0
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - elastic
+
+  debezium:
+    image: debezium/connect:1.6
+    container_name: debezium
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=sua_database.config
+      - OFFSET_STORAGE_TOPIC=sua_database.offsets
+      - STATUS_STORAGE_TOPIC=sua_database.status
+      - CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+      - CONFIG_STORAGE_REPLICATION_FACTOR=1
+      - OFFSET_STORAGE_REPLICATION_FACTOR=1
+      - STATUS_STORAGE_REPLICATION_FACTOR=1
+      - "JAVA_TOOL_OPTIONS=-Xmx512m"
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./debezium-config.json:/debezium/config.json
+    depends_on:
+      - kafka
+      - mysql
+    networks:
+      - elastic
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:6.2.0
+    container_name: schema-registry
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - zookeeper
+    networks:
+      - elastic
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: dbprodutos
+      MYSQL_USER: usuario
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql
