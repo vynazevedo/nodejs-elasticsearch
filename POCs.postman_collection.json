@@ -1,0 +1,189 @@
+{
+	"info": {
+		"_postman_id": "c503310f-366a-4feb-8a42-2f658dfc5aee",
+		"name": "POCs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1272939"
+	},
+	"item": [
+		{
+			"name": "Elastic + Nodejs",
+			"item": [
+				{
+					"name": "create index",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"settings\": {\r\n        \"index\": {\r\n            \"number_of_shards\": 3,\r\n            \"number_of_replicas\": 2\r\n        }\r\n    },\r\n    \"mappings\": {\r\n        \"properties\": {\r\n            \"id\": {\r\n                \"type\": \"integer\"\r\n            },\r\n            \"nome\": {\r\n                \"type\": \"text\"\r\n            },\r\n            \"descricao\": {\r\n                \"type\": \"text\"\r\n            },\r\n            \"preco\": {\r\n                \"type\": \"float\"\r\n            }\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:9200/produtos",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9200",
+							"path": [
+								"produtos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create register",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"id\": 2,\r\n        \"nome\": \"Televisor LCD LG MASTER\",\r\n        \"descricao\": \"televisor LCD\",\r\n        \"preco\": 500.50\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:9200/produtos/_doc",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9200",
+							"path": [
+								"produtos",
+								"_doc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "search registers",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"query\": {\r\n    \"match\": {\r\n      \"nome\": \"Samsung\"\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:9200/produtos/_search",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9200",
+							"path": [
+								"produtos",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update register",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"doc\": {\r\n    \"id\": 160,\r\n    \"nome\": \"Produto 7160\",\r\n    \"descricao\": \"Descrição do produto 7160\",\r\n    \"preco\": 40.144297431361366,\r\n    \"atributo\": \"cor\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:9200/produtos/_doc/WDZa6oYBQF9fjYBQckON",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9200",
+							"path": [
+								"produtos",
+								"_doc",
+								"WDZa6oYBQF9fjYBQckON"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get register",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:9200/produtos/_doc/WDZa6oYBQF9fjYBQckON",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "9200",
+							"path": [
+								"produtos",
+								"_doc",
+								"WDZa6oYBQF9fjYBQckON"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete index",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
