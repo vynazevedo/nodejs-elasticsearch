@@ -1,6 +1,14 @@
-version: '3'
+version: '3.8'
 
 services:
+  nodejs:
+    build: .
+    container_name: nodejs
+    ports:
+      - "3000:3000"
+    depends_on:
+      - elasticsearch
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
     container_name: elasticsearch
@@ -97,3 +105,6 @@ services:
       - "3306:3306"
     volumes:
       - ./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql
+
+volumes:
+  elasticsearch-data:
